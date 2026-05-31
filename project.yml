@@ -20,25 +20,27 @@ targets:
     type: application
     platform: macOS
     sources:
-      - path: Sources/Shared
+      - path: Sources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.timur.zametkigraph.macos
         PRODUCT_NAME: ZametkiGraph
+        INFOPLIST_KEY_CFBundleDisplayName: "Вселенная"
         INFOPLIST_KEY_NSHumanReadableCopyright: ""
         INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.productivity"
         ENABLE_HARDENED_RUNTIME: YES
-        CODE_SIGN_ENTITLEMENTS: Sources/Shared/ZametkiGraph.entitlements
+        CODE_SIGN_ENTITLEMENTS: Sources/Shell/Vselennaya.entitlements
 
   ZametkiGraph-iOS:
     type: application
     platform: iOS
     sources:
-      - path: Sources/Shared
+      - path: Sources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.timur.zametkigraph.ios
         PRODUCT_NAME: ZametkiGraph
+        INFOPLIST_KEY_CFBundleDisplayName: "Вселенная"
         INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         TARGETED_DEVICE_FAMILY: "1,2"

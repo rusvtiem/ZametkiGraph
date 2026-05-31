@@ -1,13 +1,18 @@
 import SwiftUI
 
 @main
-struct ZametkiGraphApp: App {
+struct VselennayaApp: App {
     @StateObject private var store = VaultStore()
     @StateObject private var theme = ThemeManager()
 
+    /// Реестр приложений Вселенной. Новое приложение = новый модуль в этом списке.
+    private let apps: [any UniverseApp] = [
+        ZametkiApp(),
+    ]
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            UniverseShellView(apps: apps)
                 .environmentObject(store)
                 .environmentObject(theme)
                 .onAppear {
