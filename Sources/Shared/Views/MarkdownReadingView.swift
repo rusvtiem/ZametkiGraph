@@ -3,6 +3,7 @@ import SwiftUI
 /// Режим «чтение» (как в Obsidian): markdown отрендерен, `[[ссылки]]` —
 /// кликабельные. Тап по ссылке вызывает `onOpen` с именем целевой заметки.
 struct MarkdownReadingView: View {
+    @EnvironmentObject var theme: ThemeManager
     let content: String
     let onOpen: (String) -> Void
 
@@ -16,8 +17,8 @@ struct MarkdownReadingView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(20)
         }
-        .background(Theme.bg)
-        .tint(Theme.accent)
+        .background(theme.bg)
+        .tint(theme.accent)
         .environment(\.openURL, OpenURLAction { url in
             guard url.scheme == "zametki" else { return .systemAction }
             if let name = URLComponents(url: url, resolvingAgainstBaseURL: false)?
@@ -42,7 +43,7 @@ struct MarkdownReadingView: View {
             inline(String(line.dropFirst(4))).font(.title3.bold())
         } else if line.hasPrefix("- ") || line.hasPrefix("* ") {
             HStack(alignment: .top, spacing: 8) {
-                Text("•").foregroundStyle(Theme.textSecondary)
+                Text("•").foregroundStyle(theme.textSecondary)
                 inline(String(line.dropFirst(2)))
             }
         } else {
@@ -55,8 +56,8 @@ struct MarkdownReadingView: View {
         if let attr = try? AttributedString(
             markdown: md,
             options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)) {
-            return Text(attr).foregroundColor(Theme.textPrimary)
+            return Text(attr).foregroundColor(theme.textPrimary)
         }
-        return Text(s).foregroundColor(Theme.textPrimary)
+        return Text(s).foregroundColor(theme.textPrimary)
     }
 }

@@ -4,6 +4,7 @@ import SwiftUI
 /// Открывается как выезжающий лист, тап по связи — переход на заметку.
 struct LinksPanel: View {
     @EnvironmentObject var store: VaultStore
+    @EnvironmentObject var theme: ThemeManager
     let note: Note?
     @Binding var selectedID: String?
     @Binding var isPresented: Bool
@@ -14,10 +15,10 @@ struct LinksPanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text("Связи").font(.headline).foregroundStyle(Theme.textPrimary)
+                Text("Связи").font(.headline).foregroundStyle(theme.textPrimary)
                 Spacer()
                 Button { isPresented = false } label: {
-                    Image(systemName: "xmark.circle.fill").foregroundStyle(Theme.textFaint)
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(theme.textFaint)
                 }
                 .buttonStyle(.plain)
             }
@@ -48,7 +49,7 @@ struct LinksPanel: View {
                 .padding(.horizontal)
             }
         }
-        .background(Theme.bgSidebar)
+        .background(theme.bgSidebar)
         .presentationDetents([.medium, .large])
     }
 
@@ -58,7 +59,7 @@ struct LinksPanel: View {
         VStack(alignment: .leading, spacing: 8) {
             Label(title, systemImage: icon)
                 .font(.caption.bold())
-                .foregroundStyle(Theme.textSecondary)
+                .foregroundStyle(theme.textSecondary)
             content()
         }
     }
@@ -71,18 +72,18 @@ struct LinksPanel: View {
                 Image(systemName: exists ? "doc.text" : "doc.badge.plus")
                 Text(name)
                 if !exists {
-                    Text("создать").font(.caption2).foregroundStyle(Theme.textFaint)
+                    Text("создать").font(.caption2).foregroundStyle(theme.textFaint)
                 }
                 Spacer(minLength: 0)
             }
-            .foregroundStyle(exists ? Theme.accent : Theme.textSecondary)
+            .foregroundStyle(exists ? theme.accent : theme.textSecondary)
             .padding(.vertical, 6)
         }
         .buttonStyle(.plain)
     }
 
     private func hint(_ s: String) -> some View {
-        Text(s).font(.caption).foregroundStyle(Theme.textFaint)
+        Text(s).font(.caption).foregroundStyle(theme.textFaint)
     }
 
     private func navigate(to name: String) {

@@ -2,10 +2,12 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var store: VaultStore
+    @EnvironmentObject var theme: ThemeManager
     @State private var selectedID: String?
     @State private var drawerOpen = false
     @State private var readingMode = false
     @State private var showLinks = false
+    @State private var showThemes = false
 
     private let drawerWidth: CGFloat = 300
 
@@ -29,7 +31,7 @@ struct ContentView: View {
 
     private var root: some View {
         ZStack(alignment: .leading) {
-            Theme.bg.ignoresSafeArea()
+            theme.bg.ignoresSafeArea()
 
             mainColumn
                 .overlay(dimOverlay)
@@ -40,11 +42,14 @@ struct ContentView: View {
                 .ignoresSafeArea(edges: .bottom)
         }
         .animation(.interactiveSpring(response: 0.32, dampingFraction: 0.86), value: drawerOpen)
-        .preferredColorScheme(.dark)
-        .tint(Theme.accent)
+        .preferredColorScheme(theme.palette.isDark ? .dark : .light)
+        .tint(theme.accent)
         .gesture(edgeDrag)
         .sheet(isPresented: $showLinks) {
             LinksPanel(note: note, selectedID: $selectedID, isPresented: $showLinks)
+        }
+        .sheet(isPresented: $showThemes) {
+            ThemePickerView(isPresented: $showThemes)
         }
         .onAppear { selectFirstIfNeeded(store.notes) }
         .onChange(of: store.notes) { _, notes in selectFirstIfNeeded(notes) }
@@ -55,12 +60,12 @@ struct ContentView: View {
     private var mainColumn: some View {
         VStack(spacing: 0) {
             topBar
-            Divider().overlay(Theme.divider)
+            Divider().overlay(theme.divider)
             content
-            Divider().overlay(Theme.divider)
+            Divider().overlay(theme.divider)
             bottomBar
         }
-        .background(Theme.bg)
+        .background(theme.bg)
     }
 
     @ViewBuilder
@@ -80,14 +85,14 @@ struct ContentView: View {
         VStack(spacing: 10) {
             Image(systemName: "doc.text")
                 .font(.system(size: 42))
-                .foregroundStyle(Theme.textFaint)
+                .foregroundStyle(theme.textFaint)
             Text("Нет открытой заметки")
-                .foregroundStyle(Theme.textSecondary)
+                .foregroundStyle(theme.textSecondary)
             Button("Открыть список") { openDrawer() }
                 .buttonStyle(.borderedProminent)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Theme.bg)
+        .background(theme.bg)
     }
 
     // MARK: Верхняя панель
@@ -96,7 +101,7 @@ struct ContentView: View {
         ZStack {
             Text(note?.title ?? "ZametkiGraph")
                 .font(.headline)
-                .foregroundStyle(Theme.textPrimary)
+                .foregroundStyle(theme.textPrimary)
                 .lineLimit(1)
                 .padding(.horizontal, 90)
 
@@ -105,7 +110,9 @@ struct ContentView: View {
                 Spacer()
                 if note != nil {
                     barButton(readingMode ? "pencil" : "book") { readingMode.toggle() }
-                    Menu {
+                }
+                Menu {
+                    if note != nil {
                         Button { readingMode.toggle() } label: {
                             Label(readingMode ? "Режим правки" : "Режим чтения",
                                   systemImage: readingMode ? "pencil" : "book")
@@ -113,24 +120,28 @@ struct ContentView: View {
                         Button { showLinks = true } label: {
                             Label("Связи", systemImage: "link")
                         }
-                        if let note {
-                            Divider()
-                            Button(role: .destructive) { delete(note) } label: {
-                                Label("Удалить заметку", systemImage: "trash")
-                            }
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis")
-                            .font(.title3)
-                            .foregroundStyle(Theme.textSecondary)
-                            .frame(width: 34, height: 34)
+                        Divider()
                     }
+                    Button { showThemes = true } label: {
+                        Label("Темы оформления", systemImage: "paintpalette")
+                    }
+                    if let note {
+                        Divider()
+                        Button(role: .destructive) { delete(note) } label: {
+                            Label("Удалить заметку", systemImage: "trash")
+                        }
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.title3)
+                        .foregroundStyle(theme.textSecondary)
+                        .frame(width: 34, height: 34)
                 }
             }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(Theme.bg)
+        .background(theme.bg)
     }
 
     // MARK: Нижняя панель
@@ -145,7 +156,7 @@ struct ContentView: View {
             bottomButton("link", "Связи") { if note != nil { showLinks = true } }
         }
         .padding(.vertical, 6)
-        .background(Theme.bg)
+        .background(theme.bg)
     }
 
     // MARK: Drawer
@@ -168,7 +179,7 @@ struct ContentView: View {
         Button(action: action) {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundStyle(Theme.textSecondary)
+                .foregroundStyle(theme.textSecondary)
                 .frame(width: 34, height: 34)
         }
         .buttonStyle(.plain)
@@ -181,7 +192,7 @@ struct ContentView: View {
                 Image(systemName: icon).font(.system(size: 18))
                 Text(label).font(.system(size: 10))
             }
-            .foregroundStyle(Theme.textSecondary)
+            .foregroundStyle(theme.textSecondary)
             .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)

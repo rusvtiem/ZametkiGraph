@@ -3,16 +3,22 @@ import SwiftUI
 @main
 struct ZametkiGraphApp: App {
     @StateObject private var store = VaultStore()
+    @StateObject private var theme = ThemeManager()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(store)
+                .environmentObject(theme)
                 .onAppear {
                     store.bootstrap()
+                    theme.loadCustomThemes(from: store.vaultURL)
                     #if os(macOS)
                     WindowPlacer.ensureOnScreen()
                     #endif
+                }
+                .onChange(of: store.vaultURL) { _, url in
+                    theme.loadCustomThemes(from: url)
                 }
         }
         #if os(macOS)

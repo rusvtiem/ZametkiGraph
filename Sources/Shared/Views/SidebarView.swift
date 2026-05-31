@@ -3,6 +3,7 @@ import SwiftUI
 /// Боковая панель (как файловый проводник Obsidian): поиск сверху + список заметок.
 struct SidebarView: View {
     @EnvironmentObject var store: VaultStore
+    @EnvironmentObject var theme: ThemeManager
     @Binding var selectedID: String?
     var onSelect: () -> Void
 
@@ -10,17 +11,17 @@ struct SidebarView: View {
         VStack(spacing: 0) {
             header
             searchField
-            Divider().overlay(Theme.divider)
+            Divider().overlay(theme.divider)
             list
         }
-        .background(Theme.bgSidebar)
+        .background(theme.bgSidebar)
     }
 
     private var header: some View {
         HStack {
             Text("Заметки")
                 .font(.headline)
-                .foregroundStyle(Theme.textPrimary)
+                .foregroundStyle(theme.textPrimary)
             Spacer()
             Button {
                 if let note = store.createNote(title: "Новая заметка") {
@@ -31,7 +32,7 @@ struct SidebarView: View {
                 Image(systemName: "square.and.pencil")
             }
             .buttonStyle(.plain)
-            .foregroundStyle(Theme.textSecondary)
+            .foregroundStyle(theme.textSecondary)
         }
         .padding(.horizontal, 16)
         .padding(.top, 16)
@@ -40,19 +41,19 @@ struct SidebarView: View {
 
     private var searchField: some View {
         HStack(spacing: 8) {
-            Image(systemName: "magnifyingglass").foregroundStyle(Theme.textFaint)
+            Image(systemName: "magnifyingglass").foregroundStyle(theme.textFaint)
             TextField("Поиск", text: $store.search)
                 .textFieldStyle(.plain)
-                .foregroundStyle(Theme.textPrimary)
+                .foregroundStyle(theme.textPrimary)
             if !store.search.isEmpty {
                 Button { store.search = "" } label: {
-                    Image(systemName: "xmark.circle.fill").foregroundStyle(Theme.textFaint)
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(theme.textFaint)
                 }
                 .buttonStyle(.plain)
             }
         }
         .padding(8)
-        .background(Theme.bgElevated)
+        .background(theme.bgElevated)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .padding(.horizontal, 12)
         .padding(.bottom, 10)
@@ -67,7 +68,7 @@ struct SidebarView: View {
                 if store.filteredNotes.isEmpty {
                     Text(store.search.isEmpty ? "Пока нет заметок" : "Ничего не найдено")
                         .font(.caption)
-                        .foregroundStyle(Theme.textFaint)
+                        .foregroundStyle(theme.textFaint)
                         .padding()
                 }
             }
@@ -83,15 +84,15 @@ struct SidebarView: View {
             HStack(spacing: 8) {
                 Image(systemName: "doc.text")
                     .font(.caption)
-                    .foregroundStyle(Theme.textFaint)
+                    .foregroundStyle(theme.textFaint)
                 Text(note.title)
                     .lineLimit(1)
-                    .foregroundStyle(Theme.textPrimary)
+                    .foregroundStyle(theme.textPrimary)
                 Spacer(minLength: 0)
             }
             .padding(.vertical, 7)
             .padding(.horizontal, 12)
-            .background(selectedID == note.id ? Theme.accent.opacity(0.22) : Color.clear)
+            .background(selectedID == note.id ? theme.accent.opacity(0.22) : Color.clear)
             .clipShape(RoundedRectangle(cornerRadius: 6))
             .padding(.horizontal, 8)
         }
