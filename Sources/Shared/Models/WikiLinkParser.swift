@@ -32,4 +32,24 @@ enum WikiLinkParser {
         }
         return result
     }
+
+    private static let linkAllowed = CharacterSet(
+        charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_")
+
+    /// Превращает `[[Имя]]` в markdown-ссылку `[Имя](zametki://open?name=...)`,
+    /// чтобы SwiftUI-рендер показал кликабельную ссылку в режиме чтения.
+    static func markdownified(_ text: String) -> String {
+        let ms = matches(in: text)
+        guard !ms.isEmpty else { return text }
+        var result = ""
+        var idx = text.startIndex
+        for m in ms {
+            result += text[idx..<m.range.lowerBound]
+            let enc = m.target.addingPercentEncoding(withAllowedCharacters: linkAllowed) ?? m.target
+            result += "[\(m.target)](zametki://open?name=\(enc))"
+            idx = m.range.upperBound
+        }
+        result += text[idx...]
+        return result
+    }
 }
