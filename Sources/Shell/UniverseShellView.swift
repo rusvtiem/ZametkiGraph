@@ -42,9 +42,9 @@ struct UniverseShellView: View {
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
         }
-        // Горизонтальный ScrollView иначе жадно тянется по вертикали и съедает
-        // область модуля — прижимаем к высоте содержимого.
-        .fixedSize(horizontal: false, vertical: true)
+        // Горизонтальный ScrollView иначе жадно тянется по вертикали (а fixedSize
+        // делает его размер вырожденным и схлопывает всё окно) — фиксируем высоту.
+        .frame(height: 44)
         .frame(maxWidth: .infinity)
         .background(theme.bgSidebar)
     }

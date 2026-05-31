@@ -28,7 +28,6 @@ struct VselennayaApp: App {
         }
         #if os(macOS)
         .defaultSize(width: 980, height: 680)
-        .windowResizability(.contentSize)
         #endif
     }
 }
