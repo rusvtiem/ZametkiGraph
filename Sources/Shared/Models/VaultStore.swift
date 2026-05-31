@@ -147,6 +147,41 @@ final class VaultStore: ObservableObject {
         }
     }
 
+    // MARK: Теги
+
+    /// Теги внутри заметки.
+    func tags(of note: Note) -> [String] {
+        WikiLinkParser.tags(in: note.content)
+    }
+
+    /// Все теги хранилища с числом заметок, по убыванию популярности.
+    var allTags: [(tag: String, count: Int)] {
+        var counts: [String: (display: String, n: Int)] = [:]
+        for note in notes {
+            for tag in WikiLinkParser.tags(in: note.content) {
+                let key = tag.lowercased()
+                let prev = counts[key]
+                counts[key] = (prev?.display ?? tag, (prev?.n ?? 0) + 1)
+            }
+        }
+        let list: [(tag: String, count: Int)] = counts.values.map { ($0.display, $0.n) }
+        return list.sorted { a, b in
+            if a.count != b.count { return a.count > b.count }
+            return a.tag.localizedCaseInsensitiveCompare(b.tag) == .orderedAscending
+        }
+    }
+
+    /// Заметки, содержащие данный тег (включая вложенные `parent/child`).
+    func notes(withTag tag: String) -> [Note] {
+        let needle = tag.lowercased()
+        return notes.filter { note in
+            WikiLinkParser.tags(in: note.content).contains {
+                let t = $0.lowercased()
+                return t == needle || t.hasPrefix(needle + "/")
+            }
+        }
+    }
+
     /// Список заметок с учётом строки поиска (по заголовку и тексту).
     var filteredNotes: [Note] {
         let q = search.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -174,14 +209,18 @@ final class VaultStore: ObservableObject {
 
         Это твоё хранилище заметок. Каждая заметка — отдельный файл `.md`.
 
-        Создавай связи через двойные скобки: [[Музыка]] — клик переводит на заметку.
+        Способы связей, как в Obsidian:
+        - `[[Музыка]]` — обычная связь: [[Музыка]]
+        - `[[Музыка|алиас]]` — другое имя: [[Музыка|про звук]]
+        - `#теги` — например #старт #пример
+        - `![[Музыка]]` — вставка заметки целиком (эмбед)
 
-        Снизу видно «Обратные связи» — кто ссылается на текущую заметку.
+        Открой **Граф** снизу — увидишь все заметки и теги связями.
         """
         let music = """
         # Музыка
 
-        Заметка про музыкальную тему. Сюда позже подключим Блокнот Композитора.
+        Заметка про музыкальную тему. Сюда позже подключим Блокнот Композитора. #музыка #пример
 
         Связь обратно: [[Добро пожаловать]]
         """

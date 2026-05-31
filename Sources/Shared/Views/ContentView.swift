@@ -8,6 +8,10 @@ struct ContentView: View {
     @State private var readingMode = false
     @State private var showLinks = false
     @State private var showThemes = false
+    @State private var showTags = false
+    @State private var tagToShow: String?
+    @State private var showGraph = false
+    @State private var graphCenter: String?  // nil — глобальный граф, иначе локальный вокруг заметки
 
     private let drawerWidth: CGFloat = 300
 
@@ -51,6 +55,17 @@ struct ContentView: View {
         .sheet(isPresented: $showThemes) {
             ThemePickerView(isPresented: $showThemes)
         }
+        .sheet(isPresented: $showGraph) {
+            GraphView(isPresented: $showGraph,
+                      centerTitle: graphCenter,
+                      onOpenNote: { open($0) },
+                      onOpenTag: { openTag($0) })
+        }
+        .sheet(isPresented: $showTags) {
+            TagIndexView(isPresented: $showTags,
+                         initialTag: tagToShow,
+                         onOpenNote: { open($0) })
+        }
         .onAppear { selectFirstIfNeeded(store.notes) }
         .onChange(of: store.notes) { _, notes in selectFirstIfNeeded(notes) }
     }
@@ -72,7 +87,9 @@ struct ContentView: View {
     private var content: some View {
         if let note {
             if readingMode {
-                MarkdownReadingView(content: note.content) { open($0) }
+                MarkdownReadingView(content: note.content,
+                                    onOpen: { open($0) },
+                                    onOpenTag: { openTag($0) })
             } else {
                 EditorPane(note: note).id(note.id)
             }
@@ -120,7 +137,16 @@ struct ContentView: View {
                         Button { showLinks = true } label: {
                             Label("Связи", systemImage: "link")
                         }
+                        Button { openLocalGraph() } label: {
+                            Label("Граф этой заметки", systemImage: "point.3.connected.trianglepath.dotted")
+                        }
                         Divider()
+                    }
+                    Button { openGlobalGraph() } label: {
+                        Label("Граф", systemImage: "circle.hexagongrid")
+                    }
+                    Button { openTags() } label: {
+                        Label("Теги", systemImage: "number")
                     }
                     Button { showThemes = true } label: {
                         Label("Темы оформления", systemImage: "paintpalette")
@@ -154,6 +180,7 @@ struct ContentView: View {
                 if note != nil { readingMode.toggle() }
             }
             bottomButton("link", "Связи") { if note != nil { showLinks = true } }
+            bottomButton("circle.hexagongrid", "Граф") { openGlobalGraph() }
         }
         .padding(.vertical, 6)
         .background(theme.bg)
@@ -223,11 +250,37 @@ struct ContentView: View {
     }
 
     private func open(_ name: String) {
-        if let existing = store.note(titled: name) {
+        // имя из [[Заметка#Заголовок]] — для навигации берём саму заметку
+        let title = name.components(separatedBy: "#").first.map {
+            $0.trimmingCharacters(in: .whitespaces)
+        } ?? name
+        guard !title.isEmpty else { return }
+        if let existing = store.note(titled: title) {
             selectedID = existing.id
-        } else if let created = store.createNote(title: name) {
+        } else if let created = store.createNote(title: title) {
             selectedID = created.id
         }
+        readingMode = true
+    }
+
+    private func openTag(_ tag: String) {
+        tagToShow = tag
+        showTags = true
+    }
+
+    private func openTags() {
+        tagToShow = nil
+        showTags = true
+    }
+
+    private func openGlobalGraph() {
+        graphCenter = nil
+        showGraph = true
+    }
+
+    private func openLocalGraph() {
+        graphCenter = note?.title
+        showGraph = true
     }
 
     private func delete(_ note: Note) {
