@@ -8,6 +8,7 @@ struct VselennayaApp: App {
     /// Реестр приложений Вселенной. Новое приложение = новый модуль в этом списке.
     private let apps: [any UniverseApp] = [
         ZametkiApp(),
+        KompozitorApp(),
     ]
 
     var body: some Scene {
