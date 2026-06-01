@@ -11,6 +11,13 @@ struct MusicNoteEditorView: View {
     @State private var meta = MusicMeta()
     @State private var body_ = ""
     @State private var loaded = false
+    @State private var expanded: Param?
+
+    /// Параметр с барабаном-выбором.
+    private enum Param { case tonality, tempo, meter }
+
+    /// Значение «не задано» в барабане (наверху списка → пустое поле).
+    private static let none = "—"
 
     var body: some View {
         Form {
@@ -33,9 +40,9 @@ struct MusicNoteEditorView: View {
 
     private var paramsSection: some View {
         Section {
-            field("Тональность", text: $meta.tonality, placeholder: "напр. Am")
-            field("Темп (BPM)", text: $meta.tempo, placeholder: "напр. 120", number: true)
-            field("Размер", text: $meta.meter, placeholder: "напр. 4/4")
+            wheelRow("Тональность", param: .tonality, text: $meta.tonality, options: MusicMeta.tonalities)
+            wheelRow("Темп (BPM)", param: .tempo, text: $meta.tempo, options: MusicMeta.tempos)
+            wheelRow("Размер", param: .meter, text: $meta.meter, options: MusicMeta.meters)
             field("Состав", text: $meta.instruments, placeholder: "напр. фортепиано, скрипка")
             Picker("Статус", selection: $meta.status) {
                 ForEach(MusicStatus.allCases) { s in
@@ -46,6 +53,60 @@ struct MusicNoteEditorView: View {
             Text("Параметры").foregroundStyle(theme.textSecondary)
         }
         .listRowBackground(theme.bgElevated)
+    }
+
+    // MARK: Барабан-выбор (тональность / темп / размер)
+
+    /// Строка-параметр: тап раскрывает барабан со значениями. «—» = пусто.
+    @ViewBuilder
+    private func wheelRow(_ label: String, param: Param,
+                          text: Binding<String>, options base: [String]) -> some View {
+        Button {
+            withAnimation { expanded = (expanded == param) ? nil : param }
+        } label: {
+            HStack {
+                Text(label).foregroundStyle(theme.textSecondary)
+                Spacer()
+                Text(text.wrappedValue.isEmpty ? Self.none : text.wrappedValue)
+                    .foregroundStyle(expanded == param ? theme.accent : theme.textPrimary)
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.system(size: 12))
+                    .foregroundStyle(theme.textFaint)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+
+        if expanded == param {
+            Picker(label, selection: wheelBinding(text)) {
+                ForEach(wheelOptions(base, current: text.wrappedValue), id: \.self) { opt in
+                    Text(opt).tag(opt)
+                }
+            }
+            .labelsHidden()
+            #if os(iOS)
+            .pickerStyle(.wheel)
+            .frame(maxHeight: 150)
+            #else
+            .pickerStyle(.menu)
+            #endif
+        }
+    }
+
+    /// Маппинг пустого значения на «—» и обратно для выбора в барабане.
+    private func wheelBinding(_ text: Binding<String>) -> Binding<String> {
+        Binding(
+            get: { text.wrappedValue.isEmpty ? Self.none : text.wrappedValue },
+            set: { text.wrappedValue = ($0 == Self.none) ? "" : $0 }
+        )
+    }
+
+    /// Список для барабана: «—» сверху + значения. Если у заметки старое значение
+    /// вне списка (введено текстом раньше) — добавляем его, чтобы не потерять.
+    private func wheelOptions(_ base: [String], current: String) -> [String] {
+        var opts = [Self.none] + base
+        if !current.isEmpty && !base.contains(current) { opts.insert(current, at: 1) }
+        return opts
     }
 
     private var descriptionSection: some View {
@@ -90,16 +151,13 @@ struct MusicNoteEditorView: View {
     // MARK: Поле формы
 
     private func field(_ label: String, text: Binding<String>,
-                       placeholder: String, number: Bool = false) -> some View {
+                       placeholder: String) -> some View {
         HStack {
             Text(label).foregroundStyle(theme.textSecondary)
             Spacer()
             TextField(placeholder, text: text)
                 .multilineTextAlignment(.trailing)
                 .foregroundStyle(theme.textPrimary)
-                #if os(iOS)
-                .keyboardType(number ? .numbersAndPunctuation : .default)
-                #endif
         }
     }
 

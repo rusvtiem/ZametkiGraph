@@ -31,6 +31,20 @@ struct MusicMeta: Equatable {
     /// Маркер музыкальной заметки в шапке: `тип: музыка`.
     static let typeKey = "тип"
     static let typeValue = "музыка"
+
+    // MARK: Значения для барабанов-выборов
+
+    /// Тональности: 12 нот × мажор/минор (минор — суффикс `m`).
+    static let tonalities: [String] = {
+        let notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+        return notes.flatMap { [$0, $0 + "m"] }
+    }()
+
+    /// Темп (BPM) — диапазон значений для барабана.
+    static let tempos: [String] = (40...240).map(String.init)
+
+    /// Музыкальные размеры.
+    static let meters = ["4/4", "3/4", "2/4", "2/2", "6/8", "9/8", "12/8", "5/4", "7/8", "3/8"]
 }
 
 // MARK: - Frontmatter (шапка файла)
