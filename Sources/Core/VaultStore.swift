@@ -114,7 +114,10 @@ final class VaultStore: ObservableObject {
         }
         try? "".write(to: url, atomically: true, encoding: .utf8)
         reload()
-        return notes.first { $0.url == url }
+        // Ищем по имени, а не по `url ==`: системный листинг папки отдаёт пути с
+        // префиксом /private (симлинк), собранный вручную url — без него, и сравнение
+        // объектов URL даёт false. Имя файла стабильно и сравнивается с нормализацией.
+        return note(titled: name)
     }
 
     func save(_ note: Note, content: String) {
