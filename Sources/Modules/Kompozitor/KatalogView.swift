@@ -63,9 +63,7 @@ struct KatalogView: View {
     }
 
     private func row(_ note: Note) -> some View {
-        Button {
-            path.append(note)
-        } label: {
+        NavigationLink(value: note) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(note.title)
                     .font(.system(size: 16, weight: .medium))
@@ -81,9 +79,7 @@ struct KatalogView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
         .listRowBackground(theme.bgElevated)
     }
 
@@ -114,7 +110,9 @@ struct KatalogView: View {
         let name = newName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let created = store.createMusicNote(title: name.isEmpty ? "Новая идея" : name)
         else { return }
-        path.append(created)
+        // Открываем созданную идею после того, как алерт закроется: переход из
+        // действия алерта iOS теряет, отложенный append отрабатывает надёжно.
+        DispatchQueue.main.async { path.append(created) }
     }
 
     private func delete(_ items: [Note], _ offsets: IndexSet) {
