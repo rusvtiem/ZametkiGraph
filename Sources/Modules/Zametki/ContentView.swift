@@ -66,8 +66,8 @@ struct ContentView: View {
                          initialTag: tagToShow,
                          onOpenNote: { open($0) })
         }
-        .onAppear { selectFirstIfNeeded(store.notes) }
-        .onChange(of: store.notes) { _, notes in selectFirstIfNeeded(notes) }
+        .onAppear { selectFirstIfNeeded(store.textNotes) }
+        .onChange(of: store.notes) { _, _ in selectFirstIfNeeded(store.textNotes) }
     }
 
     // MARK: Основная колонка

@@ -62,10 +62,10 @@ struct SidebarView: View {
     private var list: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 2) {
-                ForEach(store.filteredNotes) { note in
+                ForEach(store.filteredTextNotes) { note in
                     row(note)
                 }
-                if store.filteredNotes.isEmpty {
+                if store.filteredTextNotes.isEmpty {
                     Text(store.search.isEmpty ? "Пока нет заметок" : "Ничего не найдено")
                         .font(.caption)
                         .foregroundStyle(theme.textFaint)

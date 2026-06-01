@@ -14,11 +14,11 @@ struct TagIndexView: View {
     var body: some View {
         NavigationStack(path: $path) {
             List {
-                if store.allTags.isEmpty {
+                if store.textTags.isEmpty {
                     Text("Тегов пока нет. Добавь `#тег` в текст заметки.")
                         .font(.callout).foregroundStyle(.secondary)
                 } else {
-                    ForEach(store.allTags, id: \.tag) { item in
+                    ForEach(store.textTags, id: \.tag) { item in
                         NavigationLink(value: item.tag) {
                             HStack {
                                 Label("#" + item.tag, systemImage: "number")
@@ -46,7 +46,7 @@ struct TagIndexView: View {
 
     private func tagNotes(_ tag: String) -> some View {
         List {
-            let hits = store.notes(withTag: tag)
+            let hits = store.textNotes(withTag: tag)
             if hits.isEmpty {
                 Text("Нет заметок с этим тегом").foregroundStyle(.secondary)
             } else {

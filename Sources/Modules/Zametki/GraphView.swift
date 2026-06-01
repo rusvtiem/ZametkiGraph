@@ -69,7 +69,7 @@ struct GraphView: View {
     // MARK: Построение
 
     private func buildLayout() {
-        let full = GraphModel.build(from: store.notes)
+        let full = GraphModel.build(from: store.textNotes)
         let model = centerTitle.map { full.localGraph(around: $0, depth: 2) } ?? full
         layout = GraphLayout(model: model, centerID: centerID)
         scale = 1; baseScale = 1; offset = .zero
